@@ -1,0 +1,10 @@
+logs
+cpp_algos
+*.log
+.idea
+__pycache__
+.vscode
+.spyproject
+python_algos
+*.out
+algos
