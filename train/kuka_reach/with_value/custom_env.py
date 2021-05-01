@@ -121,15 +121,16 @@ class KukaReachEnv(gym.Env):
         self.orientation = p.getQuaternionFromEuler(
             [0., -math.pi, math.pi / 2.])
 
-        self.seed()
+        self.seed(config["seed"])
        # self.reset()
 
-    # def seed(self, seed=None):
-    #     random.seed(seed)
+    # * why there need a seed function and why should write as this, please refer to the docs/Reinforcement Learning.md
+    def seed(self, seed=None):    
+        random.seed(seed)
     
-    def seed(self, seed=None):
-        self.np_random, seed = seeding.np_random(seed)
-        return [seed]
+    # def seed(self, seed=None):
+    #     self.np_random, seed = seeding.np_random(seed)
+    #     return [seed]
     
     def reset(self):
         #p.connect(p.GUI)

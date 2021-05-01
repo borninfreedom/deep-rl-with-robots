@@ -19,32 +19,33 @@ ray.shutdown()
 ray.init(ignore_reinit_error=True)
 
 config = {
-    'env': KukaReachEnv,
-    'env_config':{
+    "env": KukaReachEnv,
+    "env_config":{
         "is_render":False,
         "is_good_view":False,
-        "max_steps_one_episode":1000
+        "max_steps_one_episode":1000,
+        "seed":10
     },
-    'num_workers':1,
-    'num_gpus':1,
-    'framework':'torch',
-    'render_env':False,
-    'num_gpus_per_worker':0,
-    'num_envs_per_worker':1,
-    'rollout_fragment_length':1000,
-    'train_batch_size':1000,
+    "num_workers":10,
+    "num_gpus":1,
+    "framework":"torch",
+    "render_env":False,
+    "num_gpus_per_worker":0,
+    "num_envs_per_worker":1,
+    # "rollout_fragment_length":1000,
+    # "train_batch_size":1000,
     
 }
 
 stop = {
-    'episode_reward_mean': 200
+    "episode_reward_mean": 10
 }
 st=time.time()
 results = tune.run(
-    'IMPALA', # Specify the algorithm to train
+    "PPO", # Specify the algorithm to train
     config=config,
     stop=stop
 )
-print('elapsed time=',time.time()-st)
+print("elapsed time=",time.time()-st)
  
 ray.shutdown()

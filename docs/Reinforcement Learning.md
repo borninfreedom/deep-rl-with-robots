@@ -75,3 +75,6 @@
 # People in relative projects
 * [Yang Guan](https://idthanm.github.io/)
 
+# Other knowledges
+* [Why do we always need to set env.seed(#) for open gym ai?](https://stackoverflow.com/questions/55187826/why-do-we-always-need-to-set-env-seed-for-open-gym-ai)
+* [Setting random seed to reproduce the same results](https://github.com/openai/gym/issues/428)
