@@ -244,9 +244,9 @@ class KukaReachEnv(gym.Env):
         return self._reward()
 
     def _get_observation(self):
-        self.object_pos = p.getBasePositionAndOrientation(self.object_id)[0]
-        self.robot_pos=p.getLinkState(self.kuka_id,self.num_joints-1)[4]
-        return np.array(self.object_pos).astype(np.float32)
+        self.object_pos = list(p.getBasePositionAndOrientation(self.object_id)[0])
+        self.robot_pos=list(p.getLinkState(self.kuka_id,self.num_joints-1)[4])
+        return self.object_pos+self.robot_pos
     
     def _reward(self):
 
