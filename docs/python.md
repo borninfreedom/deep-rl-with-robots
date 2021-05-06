@@ -1,8 +1,10 @@
 # Python Knowledge
-## [Python中的作用域、global与nonlocal](https://note.qidong.name/2017/07/python-legb/)
-## [Delgan/loguru](https://github.com/Delgan/loguru), this is a great python log module, it is much greater than python built in logging module.
-## [wandb](https://wandb.ai/site),Developer tools for machine learning. Build better models faster with experiment tracking, dataset .
-## logging usage
+
+* [python中的cls到底指的是什么，与self有什么区别?](https://www.zhihu.com/question/49660420/answer/335991541)
+* [Python中的作用域、global与nonlocal](https://note.qidong.name/2017/07/python-legb/)
+* [Delgan/loguru](https://github.com/Delgan/loguru), this is a great python log module, it is much greater than python built in logging module.
+* [wandb](https://wandb.ai/site),Developer tools for machine learning. Build better models faster with experiment tracking, dataset .
+* logging usage
 ```python
 logging.basicConfig(
     level=logging.INFO,
@@ -24,8 +26,9 @@ logger.addHandler(stream_handler)
 # logger.debug()
 ```
 
-## Notes from fluent python.
-### 特殊方法
+
+# Notes from fluent python.
+## 特殊方法
 *  Python 2.6 开始，namedtuple 就加入到 Python 里，用以构建只有少数属性但是没有方法的对象，比如数据库条目
 * bool(x) 的背后是调用 x.__bool__() 的结果,如果不存在 __bool__ 方法，那么 bool(x) 会尝试调用 x.__len__()。若返回 0，则 bool 会返回 False；否则返回 True。
 
@@ -49,7 +52,7 @@ class Vector:
     return Vector(self.x * scalar, self.y * scalar)
  ```
 # Python tricks for algorithms and data structure
-## string to char and char to string
+* string to char and char to string
 ```python
 a="string"
 b=list(a)
@@ -58,5 +61,10 @@ c=''.join(b)
 #c='string'
 ```
 
-## the extend method is more convenience than append
-## Be good at map function, [Python map() 函数](https://www.runoob.com/python/python-func-map.html)
+*  the extend method is more convenience than append
+* Be good at map function, [Python map() 函数](https://www.runoob.com/python/python-func-map.html)
+
+
+
+# Management  python
+* [Save the environment with conda (and how to let others run your programs)](https://kiwidamien.github.io/save-the-environment-with-conda-and-how-to-let-others-run-your-programs.html)

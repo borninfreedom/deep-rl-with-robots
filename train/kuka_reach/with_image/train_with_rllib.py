@@ -6,6 +6,8 @@ from env import KukaCamReachEnv
 from ray import tune
 from ray.tune import grid_search
 from ray.rllib.env.env_context import EnvContext
+from ray.tune.registry import register_trainable
+from ray.rllib.agents.ppo import PPOTrainer
 
 ray.shutdown()
 ray.init(ignore_reinit_error=True)
@@ -22,7 +24,7 @@ config = {
         "fcnet_hiddens":[64,64],
         "fcnet_activation":"tanh"
     },
-    "num_workers":10,
+    "num_workers":1,
     "num_gpus":1,
     "framework":"torch",
     "render_env":False,
@@ -38,20 +40,24 @@ stop = {
     "episode_reward_mean": 1,
     "training_iteration":500,
 }
+
+ModelPrintPPOTrainer = PPOTrainer.with_updates(after_init=lambda trainer: trainer.get_policy().model.base_model.summary())
+register_trainable("ModelPrintPPOTrainer", ModelPrintPPOTrainer)
 st=time.time()
 results = tune.run(
-    "PPO", # Specify the algorithm to train
+    "ModelPrintPPOTrainer", # Specify the algorithm to train
     config=config,
     stop=stop,
     checkpoint_freq=1,
 )
+#tune.run("ModelPrintPPOTrainer",...)
+# trainer=ppo.PPOTrainer(config=config)
+# print(trainer.get_policy().model.base_model.summary())
+# metric="episode_reward_mean"
+# best_trial = results.get_best_trial(metric=metric, mode="max", scope="all")
+# best_checkpoint=results.get_best_checkpoint(best_trial,metric=metric,mode="max")
 
-
-metric="episode_reward_mean"
-best_trial = results.get_best_trial(metric=metric, mode="max", scope="all")
-best_checkpoint=results.get_best_checkpoint(best_trial,metric=metric,mode="max")
-
-print('best checkpoint: ',best_checkpoint)
-print("elapsed time=",time.time()-st)
+# print('best checkpoint: ',best_checkpoint)
+# print("elapsed time=",time.time()-st)
  
 ray.shutdown()
