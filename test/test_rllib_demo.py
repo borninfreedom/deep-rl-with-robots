@@ -17,6 +17,7 @@ from ray.rllib.agents.ppo import PPOTrainer
 
 if __name__ == "__main__":
    
+    ray.shutdown()
     ray.init()
 
     ModelCatalog.register_custom_model(
@@ -29,24 +30,15 @@ if __name__ == "__main__":
             "custom_model": "fast_model"
         },
         # Use GPUs iff `RLLIB_NUM_GPUS` env var set to > 0.
-        "num_gpus": 1,
+        "num_gpus": 0,
         "num_workers": 1,
         "framework": "torch",
     }
     
 
-    config_for_trainer = {
-       
-        "model": {
-            "custom_model": "fast_model"
-        },
-        # Use GPUs iff `RLLIB_NUM_GPUS` env var set to > 0.
-        "num_gpus": 1,
-        "num_workers": 1,
-        "framework": "torch",
-    }
-
+    trainer=PPOTrainer(config=config)
+    print(trainer.get_policy().model)
     
-    tune.run("PPO", config=config, verbose=1)
+    # tune.run("PPO", config=config, verbose=3)
 
     ray.shutdown()

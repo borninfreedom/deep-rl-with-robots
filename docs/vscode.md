@@ -1,7 +1,7 @@
 # VSCode tricks
-## [About python extensions](https://zhuanlan.zhihu.com/p/361654489?utm_source=com.miui.notes&utm_medium=social&utm_oi=903420714332332032)
+##  [About python extensions](https://zhuanlan.zhihu.com/p/361654489?utm_source=com.miui.notes&utm_medium=social&utm_oi=903420714332332032)
 
-## Resolve a.py in A folder import b.py in B folder
+##  Resolve a.py in A folder import b.py in B folder
 * Add the codes below at the top of a .py file
 ```python
 import os,inspect
@@ -52,5 +52,11 @@ sys.path.append('../')
 	],
 	}	
 }
+```
+
+## The problem that Microsoft Store and UWP apps can't connect the Internet when using V2rayN.
+* Open the PowerShell as administrator, run the command
+```
+foreach ($n in (get-appxpackage).packagefamilyname) {checknetisolation loopbackexempt -a -n="$n"}
 ```
 
