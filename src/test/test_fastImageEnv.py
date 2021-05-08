@@ -10,7 +10,7 @@ import os
 import ray
 import ray.tune as tune
 from ray.tune import sample_from
-from ray.rllib.examples.env.fast_image_env import FastImageEnv
+from fast_image_env import FastImageEnv
 from fast_model import TorchFastModel
 from ray.rllib.models import ModelCatalog
 from ray.rllib.agents.ppo import PPOTrainer

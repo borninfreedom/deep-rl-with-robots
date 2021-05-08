@@ -7,23 +7,33 @@ from ray.rllib.utils.framework import try_import_torch
 
 torch, nn = try_import_torch()
 
-# class TorchCustomFastModel(TorchModelV2,nn.Module):
-#     def __init__(self, obs_space, action_space, num_outputs, model_config,
-#                 name):
-#         TorchModelV2.__init__(self, obs_space, action_space, num_outputs,
-#                               model_config, name)
-#         nn.Module.__init__(self)
+class TorchCustomFastModel(TorchModelV2,nn.Module):
+    def __init__(self, obs_space, action_space, num_outputs, model_config,
+                name):
+        TorchModelV2.__init__(self, obs_space, action_space, num_outputs,
+                              model_config, name)
+        nn.Module.__init__(self)
         
-#         self.conv1=SlimConv2d(obs_space.shape[2],32,3,2,1)
-#         self.conv2=SlimConv2d(32,32,3,2,1)
-#         self.conv3=SlimConv2d(32,32,3,2,1)
-#         self.conv4=SlimConv2d(32,32,3,2,1)
-#         self.fc1=SlimFC(32*6*6,512)
-#         self.fc_out=SlimFC(512,num_outputs)
+        self.conv1=SlimConv2d(obs_space.shape[0],32,3,2,1)
+        self.conv2=SlimConv2d(32,32,3,2,1)
+        self.conv3=SlimConv2d(32,32,3,2,1)
+        self.conv4=SlimConv2d(32,32,3,2,1)
+        self.fc1=SlimFC(32*6*6,512)
+        self.fc_out=SlimFC(512,num_outputs)
 
-#     @override(ModelV2)
-#     def forward(self, input_dict, state, seq_lens):
-#         x=self.conv1()
+    @override(ModelV2)
+    def forward(self, input_dict, state, seq_lens):
+        x=self.conv1(input_dict['obs'])
+        x=self.conv2(x)
+        x=self.conv3(x)
+        x=self.conv4(x)
+        x=x.view(x.size(0),-1)
+        print('x: ',x)
+        print('x.shape: ', x.shape)
+        x=self.fc1(x)
+        output=self.fc_out(x)
+        return output.squeeze()
+        
         
 
 class TorchFastModel(TorchModelV2, nn.Module):
