@@ -23,8 +23,8 @@ if __name__ == "__main__":
     config = {
         "env": FastImageEnv,
         # Use GPUs iff `RLLIB_NUM_GPUS` env var set to > 0.
-        "num_gpus": 0,
-        "num_workers": 1,
+        "num_gpus": 1,
+        "num_workers": 4,
         "framework": "torch",
     }
     

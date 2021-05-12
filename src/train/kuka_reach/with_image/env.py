@@ -154,7 +154,7 @@ class KukaCamReachEnv(gym.Env):
         #                              high=np.array([self.x_high_obs,self.y_high_obs,self.z_high_obs]),
         #                              dtype=np.float32)
 
-        self.observation_space = spaces.Box(low=0, high=255, shape=(84,84))
+        self.observation_space = spaces.Box(low=0, high=255, shape=(84,84,1))
 
         self.step_counter = 0
 
@@ -184,7 +184,8 @@ class KukaCamReachEnv(gym.Env):
         #self.reset()
 
     def seed(self, seed=None):
-        random.seed(seed)
+        self.np_random,seed=seeding.np_random(seed)
+        return [seed]
 
     def reset(self):
         #p.connect(p.GUI)
@@ -236,9 +237,9 @@ class KukaCamReachEnv(gym.Env):
         self.object_id = p.loadURDF(os.path.join(self.urdf_root_path,
                                                  "random_urdfs/000/000.urdf"),
                                     basePosition=[
-                                        random.uniform(self.x_low_obs,
+                                        self.np_random.uniform(self.x_low_obs,
                                                        self.x_high_obs),
-                                        random.uniform(self.y_low_obs,
+                                        self.np_random.uniform(self.y_low_obs,
                                                        self.y_high_obs), 0.01
                                     ])
 
@@ -305,10 +306,10 @@ class KukaCamReachEnv(gym.Env):
         
         if image is not None:
             image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-            image = cv2.resize(image, (84, 84))
+            image = cv2.resize(image, (84, 84))[:,:,None]/255.
             return image
         else:
-            return np.zeros((84, 84))
+            return np.zeros((84, 84,1))
 
         # image=image.transpose((2,0,1))
         # image=np.ascontiguousarray(image,dtype=np.float32)/255.
@@ -319,6 +320,7 @@ class KukaCamReachEnv(gym.Env):
 
 
     def step(self, action):
+       # print('action: ',action)
         dv = 0.005
         dx = action[0] * dv
         dy = action[1] * dv
@@ -415,8 +417,8 @@ class KukaCamReachEnv(gym.Env):
         # self.observation = self.object_state
         return self._process_image(), reward, self.terminated, {}
 
-    def close(self):
-        p.disconnect()
+    # def close(self):
+    #     p.disconnect()
 
     # def run_for_debug(self, target_position):
     #     temp_robot_joint_positions = p.calculateInverseKinematics(
@@ -501,9 +503,9 @@ if __name__ == '__main__':
     print(obs)
     print(obs.shape)
 
-    img = obs
-    plt.imshow(img, cmap='gray')
-    plt.show()
+    # img = obs
+    # plt.imshow(img, cmap='gray')
+    # plt.show()
 
     # all the below are some debug codes, if you have interests, look through.
 

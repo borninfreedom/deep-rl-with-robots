@@ -16,5 +16,6 @@ class FastImageEnv(gym.Env):
         return self.zeros
 
     def step(self, action):
+        print('action: ',action)
         self.i += 1
         return self.zeros, 1, self.i > 1000, {}
