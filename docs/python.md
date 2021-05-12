@@ -1,5 +1,7 @@
 # Python Knowledge
 
+* [python入门（8）-对象继承、重写方法、多态性、静态](https://www.pythonf.cn/read/91537)
+* [Saving 9 GB of RAM with Python’s __slots__](http://tech.oyster.com/save-ram-with-python-slots/)
 * [python中的cls到底指的是什么，与self有什么区别?](https://www.zhihu.com/question/49660420/answer/335991541)
 * [Python中的作用域、global与nonlocal](https://note.qidong.name/2017/07/python-legb/)
 * [Delgan/loguru](https://github.com/Delgan/loguru), this is a great python log module, it is much greater than python built in logging module.
