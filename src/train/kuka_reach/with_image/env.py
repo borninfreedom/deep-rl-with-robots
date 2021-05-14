@@ -89,8 +89,6 @@ class KukaCamReachEnv(gym.Env):
             ],  #the direction is from the light source position to the origin of the world frame.
         }
 
-        self.device = torch.device(
-            "cuda" if torch.cuda.is_available() else "cpu")
         
         # self.view_matrix=p.computeViewMatrix(
         #     cameraEyePosition=self.camera_parameters['eye_position'],
@@ -154,7 +152,7 @@ class KukaCamReachEnv(gym.Env):
         #                              high=np.array([self.x_high_obs,self.y_high_obs,self.z_high_obs]),
         #                              dtype=np.float32)
 
-        self.observation_space = spaces.Box(low=0, high=255, shape=(84,84,1))
+        self.observation_space = spaces.Box(low=0, high=1., shape=(84,84,1))
 
         self.step_counter = 0
 
@@ -356,6 +354,7 @@ class KukaCamReachEnv(gym.Env):
             time.sleep(0.05)
 
         self.step_counter += 1
+      #  print(Fore.GREEN+'step_counter={}'.format(self.step_counter))
 
         return self._reward()
 
@@ -462,8 +461,8 @@ class CustomSkipFrame(gym.Wrapper):
     def __init__(self, env, skip=4):
         super(CustomSkipFrame, self).__init__(env)
         self.observation_space = spaces.Box(low=0,
-                                            high=1,
-                                            shape=(skip, 84, 84))
+                                            high=1.,
+                                            shape=(84, 84, skip))
         self.skip = skip
 
     def step(self, action):
@@ -477,13 +476,16 @@ class CustomSkipFrame(gym.Wrapper):
                 states.append(state)
             else:
                 states.append(state)
-        states = np.concatenate(states, 0)[None, :, :, :]
+        states = np.concatenate(states, 2)
         return states.astype(np.float32), reward, done, info
 
     def reset(self):
         state = self.env.reset()
-        states = np.concatenate([state for _ in range(self.skip)],
-                                0)[None, :, :, :]
+        states = np.concatenate([state for _ in range(self.skip)],2)
+        # print('states=',states)
+        # print('states.shape=',states.shape)
+        # states = np.concatenate([state for _ in range(self.skip)],
+        #                         0)[:, :, :, None]
         return states.astype(np.float32)
 
 
@@ -497,11 +499,17 @@ if __name__ == '__main__':
     
     import matplotlib.pyplot as plt
     env = KukaCamReachEnv(env_config)
-    #env = CustomSkipFrame(env)
+    env = CustomSkipFrame(env)
 
     obs = env.reset()
     print(obs)
     print(obs.shape)
+    
+    action=env.action_space.sample()
+    print('action=',action)
+    
+    obs,_,_,_=env.step(action)
+    print('obs.shape=',obs.shape)
 
     # img = obs
     # plt.imshow(img, cmap='gray')
