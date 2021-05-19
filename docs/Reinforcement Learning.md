@@ -8,6 +8,11 @@
 * [pg-is-all-you-need](https://github.com/MrSyee/pg-is-all-you-need)
 * [Easy-RL](https://datawhalechina.github.io/easy-rl/#/)
 # Blogs
+
+# [Flood Sung](https://www.zhihu.com/people/flood-sung)
+
+* [最前沿：大规模深度强化学习的发展](https://zhuanlan.zhihu.com/p/145983063)
+
 ## [刘建平Pinard](https://www.cnblogs.com/pinard/)
 * [强化学习(十二) Dueling DQN](https://www.cnblogs.com/pinard/p/9923859.html)
 

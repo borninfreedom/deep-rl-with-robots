@@ -17,3 +17,6 @@
 - 高冷的面试官: 你了解model-free和model-based吗?两者有什么区别呢?
 
   答: 两者的区别主要在于是否需要对于真实的环境进行建模, model-free不需要对于环境进行建模,直接与真实环境进行交互即可,所以其通常需要较大的数据或者采样工作来优化策略,这也帮助model-free对于真实环境具有更好的泛化性能; 而model-based 需要对于环境进行建模,同时再真实环境与虚拟环境中进行学习,如果建模的环境与真实环境的差异较大,那么会限制其泛化性能。现在通常使用model-free进行模型的构建工作。
+
+- 对于深度学习的训练，一般batch越大，学习效果越快越好。因为我们一直用的是stochastic gradient descent 而不是完全的gradient descent，batch越大，越趋近于完全的gradient descent。
+

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 '''
-@File    :   kuka_reach_env.py
+@File    :   kuka_cam_reach_env.py
 @Time    :   2021/03/20 14:33:24
 @Author  :   Yan Wen 
 @Version :   1.0

@@ -40,27 +40,27 @@ if __name__=='__main__':
             "is_good_view":False,
             "max_steps_one_episode":1000,
         },
-        "num_workers":7,
+        "num_workers":10,
         "num_gpus":1,
         "framework":"torch",
         # "render_env":False,
         # "num_gpus_per_worker":0,
-        "num_envs_per_worker":5,
+      #  "num_envs_per_worker":5,
         # "rollout_fragment_length":1000,
         # "train_batch_size":4000,
-        "batch_mode":"complete_episodes",
+       # "batch_mode":"complete_episodes",
         #"lr":0.0001,
-        "lr":grid_search([5e-5,0.0001])
+       # "lr":grid_search([5e-5,0.0001])
     }
 
     config_for_trainer = {
         "env": "kuka_env",
-        "model":{
-            "conv_filters":[[32,[3,3],2],[32,[3,3],2],[32,[3,3],2],[32,[3,3],2],[1152,[6,6],1]],
-           # "conv_filters":"relu",
-            "post_fcnet_hiddens":[512,251],
-            "post_fcnet_activation":"relu",
-        },
+        # "model":{
+        #     "conv_filters":[[32,[3,3],2],[32,[3,3],2],[32,[3,3],2],[32,[3,3],2],[1152,[6,6],1]],
+        #    # "conv_filters":"relu",
+        #     "post_fcnet_hiddens":[512,251],
+        #     "post_fcnet_activation":"relu",
+        # },
         "env_config":{
             "is_render":False,
             "is_good_view":False,
@@ -76,15 +76,15 @@ if __name__=='__main__':
         "training_iteration":200,
     }
 
-    trainer=PPOTrainer(config=config_for_trainer)
-    print(trainer.get_policy().model)
-    
+    # trainer=PPOTrainer(config=config_for_trainer)
+    # print(trainer.get_policy().model)
+    #
     # trainer=ImpalaTrainer(config=config_for_trainer)
     # print(trainer.get_policy().model)
     
     
     results = tune.run(
-        "PPO", # Specify the algorithm to train
+        "SAC", # Specify the algorithm to train
         config=config,
         stop=stop,
         checkpoint_freq=1,

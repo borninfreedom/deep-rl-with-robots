@@ -14,45 +14,26 @@
 
 import pybullet as p
 import pybullet_data
-import os
-import sys
+
 import gym
 from gym import spaces
 from gym.utils import seeding
 import numpy as np
 from math import sqrt
-import random
+
 import time
-from numpy import arange
-import logging
+
 
 import math
 import cv2
-import torch.nn.functional as F
-import torchvision.transforms as T
-from PIL import Image
-from termcolor import colored
-import matplotlib.pyplot as plt
+
 from colorama import Fore, init, Back
-import sys
+
 import os
 
-import ray
-from ray import tune
-from ray.tune import grid_search
-from ray.rllib.env.env_context import EnvContext
-from ray.rllib.models import ModelCatalog
-from ray.rllib.models.tf.tf_modelv2 import TFModelV2
-from ray.rllib.models.tf.fcnet import FullyConnectedNetwork
-from ray.rllib.models.torch.torch_modelv2 import TorchModelV2
-from ray.rllib.models.torch.fcnet import FullyConnectedNetwork as TorchFC
-from ray.rllib.utils.framework import try_import_tf, try_import_torch
-from ray.rllib.utils.test_utils import check_learning_achieved
-
-torch, nn = try_import_torch(error=True)
-
-
 init(autoreset=True)  # this lets colorama takes effect only in current line.
+
+
 # Otherwise, colorama will let the sentences below 'print(Fore.GREEN+'xx')'
 # all become green color.
 
@@ -62,17 +43,8 @@ class KukaCamReachEnv(gym.Env):
         'render.modes': ['human', 'rgb_array'],
         'video.frames_per_second': 50
     }
-    
-
-    # final_image_size=40
-    # resize = T.Compose([T.ToPILImage(),
-    #                     T.Resize(final_image_size, interpolation=Image.CUBIC),
-    #                     T.ToTensor()])
 
     def __init__(self, config):
-
-        # some camera parameters
-        # all the parameters are tested with test/slide_bar_for_camera.py file.
 
         self.camera_parameters = {
             'width': 960.,
@@ -83,18 +55,12 @@ class KukaCamReachEnv(gym.Env):
             'eye_position': [0.59, 0, 0.8],
             'target_position': [0.55, 0, 0.05],
             'camera_up_vector':
-            [1, 0, 0],  # I really do not know the parameter's effect.
+                [1, 0, 0],  # I really do not know the parameter's effect.
             'light_direction': [
                 0.5, 0, 1
-            ],  #the direction is from the light source position to the origin of the world frame.
+            ],  # the direction is from the light source position to the origin of the world frame.
         }
 
-        
-        # self.view_matrix=p.computeViewMatrix(
-        #     cameraEyePosition=self.camera_parameters['eye_position'],
-        #     cameraTargetPosition=self.camera_parameters['target_position'],
-        #     cameraUpVector=self.camera_parameters['camera_up_vector']
-        # )
         self.view_matrix = p.computeViewMatrixFromYawPitchRoll(
             cameraTargetPosition=[0.55, 0, 0.05],
             distance=.7,
@@ -106,19 +72,18 @@ class KukaCamReachEnv(gym.Env):
         self.projection_matrix = p.computeProjectionMatrixFOV(
             fov=self.camera_parameters['fov'],
             aspect=self.camera_parameters['width'] /
-            self.camera_parameters['height'],
+                   self.camera_parameters['height'],
             nearVal=self.camera_parameters['near'],
             farVal=self.camera_parameters['far'])
 
         self.is_render = config["is_render"]
         self.is_good_view = config["is_good_view"]
-        self.max_steps_one_episode=config["max_steps_one_episode"]
-        
+        self.max_step = config["max_steps_one_episode"]
+
         if self.is_render:
             p.connect(p.GUI)
         else:
             p.connect(p.DIRECT)
-
 
         self.x_low_obs = 0.2
         self.x_high_obs = 0.7
@@ -142,17 +107,17 @@ class KukaCamReachEnv(gym.Env):
 
         self.action_space = spaces.Box(low=np.array(
             [self.x_low_action, self.y_low_action, self.z_low_action]),
-                                       high=np.array([
-                                           self.x_high_action,
-                                           self.y_high_action,
-                                           self.z_high_action
-                                       ]),
-                                       dtype=np.float32)
+            high=np.array([
+                self.x_high_action,
+                self.y_high_action,
+                self.z_high_action
+            ]),
+            dtype=np.float32)
         # self.observation_space=spaces.Box(low=np.array([self.x_low_obs,self.y_low_obs,self.z_low_obs]),
         #                              high=np.array([self.x_high_obs,self.y_high_obs,self.z_high_obs]),
         #                              dtype=np.float32)
 
-        self.observation_space = spaces.Box(low=0, high=1., shape=(84,84,1))
+        self.observation_space = spaces.Box(low=0, high=1., shape=(1, 84, 84))
 
         self.step_counter = 0
 
@@ -179,22 +144,21 @@ class KukaCamReachEnv(gym.Env):
             [0., -math.pi, math.pi / 2.])
 
         self.seed()
-        #self.reset()
+        # self.reset()
 
     def seed(self, seed=None):
-        self.np_random,seed=seeding.np_random(seed)
+        self.np_random, seed = seeding.np_random(seed)
         return [seed]
 
     def reset(self):
-        #p.connect(p.GUI)
+        # p.connect(p.GUI)
         self.step_counter = 0
 
         p.resetSimulation()
-        #p.configureDebugVisualizer(p.COV_ENABLE_RENDERING, 0)
+        # p.configureDebugVisualizer(p.COV_ENABLE_RENDERING, 0)
         self.terminated = False
         p.setGravity(0, 0, -10)
 
-      
         p.addUserDebugLine(
             lineFromXYZ=[self.x_low_obs, self.y_low_obs, 0],
             lineToXYZ=[self.x_low_obs, self.y_low_obs, self.z_high_obs])
@@ -231,14 +195,14 @@ class KukaCamReachEnv(gym.Env):
                                basePosition=[0.5, 0, -0.65])
         p.changeVisualShape(table_uid, -1, rgbaColor=[1, 1, 1, 1])
         # p.loadURDF(os.path.join(self.urdf_root_path, "tray/traybox.urdf"),basePosition=[0.55,0,0])
-        #object_id=p.loadURDF(os.path.join(self.urdf_root_path, "random_urdfs/000/000.urdf"), basePosition=[0.53,0,0.02])
+        # object_id=p.loadURDF(os.path.join(self.urdf_root_path, "random_urdfs/000/000.urdf"), basePosition=[0.53,0,0.02])
         self.object_id = p.loadURDF(os.path.join(self.urdf_root_path,
                                                  "random_urdfs/000/000.urdf"),
                                     basePosition=[
                                         self.np_random.uniform(self.x_low_obs,
-                                                       self.x_high_obs),
+                                                               self.x_high_obs),
                                         self.np_random.uniform(self.y_low_obs,
-                                                       self.y_high_obs), 0.01
+                                                               self.y_high_obs), 0.01
                                     ])
 
         self.num_joints = p.getNumJoints(self.kuka_id)
@@ -249,41 +213,7 @@ class KukaCamReachEnv(gym.Env):
                 jointIndex=i,
                 targetValue=self.init_joint_positions[i],
             )
-
-        # self.robot_pos_obs = p.getLinkState(self.kuka_id,
-        #                                     self.num_joints - 1)[4]
-        #logging.debug("init_pos={}\n".format(p.getLinkState(self.kuka_id,self.num_joints-1)))
         p.stepSimulation()
-
-        # (_,_,self.images,_,_) = p.getCameraImage(
-        #     width=self.camera_parameters['width'],
-        #     height=self.camera_parameters['height'],
-        #     viewMatrix=self.view_matrix,
-        #     projectionMatrix=self.projection_matrix,
-
-        #     renderer=p.ER_BULLET_HARDWARE_OPENGL
-        # )
-
-        # (_, _, px, _,
-        #  _) = p.getCameraImage(width=960,
-        #                        height=960,
-        #                        viewMatrix=self.view_matrix,
-        #                        projectionMatrix=self.projection_matrix,
-        #                        renderer=p.ER_BULLET_HARDWARE_OPENGL)
-        # self.images = px
-
-        # p.enableJointForceTorqueSensor(bodyUniqueId=self.kuka_id,
-        #                                jointIndex=self.num_joints - 1,
-        #                                enableSensor=True)
-
-        # print(Fore.GREEN+'force_sensor={}'.format(self._get_force_sensor_value()))
-
-        # self.object_pos = p.getBasePositionAndOrientation(self.object_id)[0]
-        #return np.array(self.object_pos).astype(np.float32)
-        #return np.array(self.robot_pos_obs).astype(np.float32)
-        # self.images = self.images[:, :, :
-        #                           3]  # the 4th channel is alpha channel, we do not need it.
-        #return self._process_image(self.images)
 
         return self._process_image()
 
@@ -294,32 +224,28 @@ class KukaCamReachEnv(gym.Env):
             image ([type]): [description]
         """
 
+        # ! There will report a error if use pybullet 3.1.7 version (2021-5-16)
         (_, _, px, _, _) = p.getCameraImage(width=960,
-                               height=960,
-                               viewMatrix=self.view_matrix,
-                               projectionMatrix=self.projection_matrix,
-                               renderer=p.ER_BULLET_HARDWARE_OPENGL)
-        
-        image = px
-        print('image.shape=',image.shape)
-        
-        if image is not None:
-            image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-            image = cv2.resize(image, (84, 84))[:,:,None]/255.
-            return image
-        else:
-            return np.zeros((84, 84,1))
+                                            height=960,
+                                            viewMatrix=self.view_matrix,
+                                            projectionMatrix=self.projection_matrix,
+                                            renderer=p.ER_BULLET_HARDWARE_OPENGL)
 
-        # image=image.transpose((2,0,1))
-        # image=np.ascontiguousarray(image,dtype=np.float32)/255.
-        # image=torch.from_numpy(image)
-        # #self.processed_image=self.resize(image).unsqueeze(0).to(self.device)
-        # self.processed_image=self.resize(image).to(self.device)
-        # return self.processed_image
+        self.image=px
+        #print(self.image.shape)
+
+
+        if self.image is not None:
+            self.image = cv2.cvtColor(self.image, cv2.COLOR_RGB2GRAY)
+            self.image = cv2.resize(self.image, (84, 84))[None, :, :] / 255.
+            return self.image
+        else:
+            return np.zeros((1, 84, 84))
+
 
 
     def step(self, action):
-       # print('action: ',action)
+        # print('action: ',action)
         dv = 0.005
         dx = action[0] * dv
         dy = action[1] * dv
@@ -331,7 +257,7 @@ class KukaCamReachEnv(gym.Env):
             self.current_pos[0] + dx, self.current_pos[1] + dy,
             self.current_pos[2] + dz
         ]
-        #logging.debug("self.new_robot_pos={}\n".format(self.new_robot_pos))
+        # logging.debug("self.new_robot_pos={}\n".format(self.new_robot_pos))
         self.robot_joint_positions = p.calculateInverseKinematics(
             bodyUniqueId=self.kuka_id,
             endEffectorLinkIndex=self.num_joints - 1,
@@ -350,39 +276,35 @@ class KukaCamReachEnv(gym.Env):
             )
         p.stepSimulation()
 
-      
         if self.is_good_view:
             time.sleep(0.05)
 
         self.step_counter += 1
-      #  print(Fore.GREEN+'step_counter={}'.format(self.step_counter))
+        #  print(Fore.GREEN+'step_counter={}'.format(self.step_counter))
 
         return self._reward()
 
     def _reward(self):
 
-      
         self.robot_state = p.getLinkState(self.kuka_id, self.num_joints - 1)[4]
         # self.object_state=p.getBasePositionAndOrientation(self.object_id)
         # self.object_state=np.array(self.object_state).astype(np.float32)
         #
         self.object_state = np.array(
             p.getBasePositionAndOrientation(self.object_id)[0]).astype(
-                np.float32)
+            np.float32)
 
-        square_dx = (self.robot_state[0] - self.object_state[0])**2
-        square_dy = (self.robot_state[1] - self.object_state[1])**2
-        square_dz = (self.robot_state[2] - self.object_state[2])**2
+        square_dx = (self.robot_state[0] - self.object_state[0]) ** 2
+        square_dy = (self.robot_state[1] - self.object_state[1]) ** 2
+        square_dz = (self.robot_state[2] - self.object_state[2]) ** 2
 
-      
         self.distance = sqrt(square_dx + square_dy + square_dz)
-        #print(self.distance)
+        # print(self.distance)
 
         x = self.robot_state[0]
         y = self.robot_state[1]
         z = self.robot_state[2]
 
-      
         terminated = bool(x < self.x_low_obs or x > self.x_high_obs
                           or y < self.y_low_obs or y > self.y_high_obs
                           or z < self.z_low_obs or z > self.z_high_obs)
@@ -391,8 +313,8 @@ class KukaCamReachEnv(gym.Env):
             reward = -0.1
             self.terminated = True
 
-     
-        elif self.step_counter > self.max_steps_one_episode:
+
+        elif self.step_counter > self.max_step:
             reward = -0.1
             self.terminated = True
 
@@ -404,43 +326,13 @@ class KukaCamReachEnv(gym.Env):
             self.terminated = False
 
         info = {'distance:', self.distance}
-        
-        # (_, _, px, _,
-        #  _) = p.getCameraImage(width=960,
-        #                        height=960,
-        #                        viewMatrix=self.view_matrix,
-        #                        projectionMatrix=self.projection_matrix,
-        #                        renderer=p.ER_BULLET_HARDWARE_OPENGL)
-        # self.images = px
-        # self.processed_image = self._process_image(self.images)
-        # #self.observation=self.robot_state
-        # self.observation = self.object_state
+
         return self._process_image(), reward, self.terminated, {}
 
-    # def close(self):
-    #     p.disconnect()
+    def close(self):
+        p.disconnect()
 
-    # def run_for_debug(self, target_position):
-    #     temp_robot_joint_positions = p.calculateInverseKinematics(
-    #         bodyUniqueId=self.kuka_id,
-    #         endEffectorLinkIndex=self.num_joints - 1,
-    #         targetPosition=target_position,
-    #         targetOrientation=self.orientation,
-    #         jointDamping=self.joint_damping,
-    #     )
-    #     for i in range(self.num_joints):
-    #         p.resetJointState(
-    #             bodyUniqueId=self.kuka_id,
-    #             jointIndex=i,
-    #             targetValue=temp_robot_joint_positions[i],
-    #         )
-    #     p.stepSimulation()
 
-     
-    #     if self.is_good_view:
-    #         time.sleep(0.05)
-
-    #     return self._get_force_sensor_value()
 
     # def _get_force_sensor_value(self):
     #     force_sensor_value = p.getJointState(bodyUniqueId=self.kuka_id,
@@ -459,11 +351,12 @@ class CustomSkipFrame(gym.Wrapper):
     Args:
         gym ([type]): [description]
     """
+
     def __init__(self, env, skip=4):
         super(CustomSkipFrame, self).__init__(env)
         self.observation_space = spaces.Box(low=0,
                                             high=1.,
-                                            shape=(84, 84, skip))
+                                            shape=(skip, 84, 84))
         self.skip = skip
 
     def step(self, action):
@@ -477,12 +370,12 @@ class CustomSkipFrame(gym.Wrapper):
                 states.append(state)
             else:
                 states.append(state)
-        states = np.concatenate(states, 2)
+        states = np.concatenate(states, 0)
         return states.astype(np.float32), reward, done, info
 
     def reset(self):
         state = self.env.reset()
-        states = np.concatenate([state for _ in range(self.skip)],2)
+        states = np.concatenate([state for _ in range(self.skip)], 0)
         # print('states=',states)
         # print('states.shape=',states.shape)
         # states = np.concatenate([state for _ in range(self.skip)],
@@ -491,29 +384,32 @@ class CustomSkipFrame(gym.Wrapper):
 
 
 if __name__ == '__main__':
- 
-    env_config={
-        "is_render":False,
-        "is_good_view":False,
-        "max_steps_one_episode":1000,
+    env_config = {
+        "is_render": False,
+        "is_good_view": False,
+        "max_steps_one_episode": 1000,
     }
-    
-    import matplotlib.pyplot as plt
+
     env = KukaCamReachEnv(env_config)
     env = CustomSkipFrame(env)
 
     obs = env.reset()
     print(obs)
     print(obs.shape)
-    
-    action=env.action_space.sample()
-    print('action=',action)
-    
-    obs,_,_,_=env.step(action)
-    print('obs.shape=',obs.shape)
+    #
+    action = env.action_space.sample()
+    print('action=', action)
+    #
+    obs, reward, done, _ = env.step(action)
+    print(obs,'\n',obs.shape,'\n',reward,'\n',done)
 
-    # img = obs
-    # plt.imshow(img, cmap='gray')
+    # import matplotlib.pyplot as plt
+    # import numpy as np
+    #
+    # img = np.moveaxis(obs,0,-1)
+    # print(img.shape)
+    #
+    # plt.imshow(img[:,:,:3])
     # plt.show()
 
     # all the below are some debug codes, if you have interests, look through.
@@ -576,10 +472,10 @@ if __name__ == '__main__':
 #                 raise ValueError('there is unequal.')
 # print('check complete')
 
-#print(a)
-#force_sensor=env.run_for_debug([0.6,0.0,0.03])
+# print(a)
+# force_sensor=env.run_for_debug([0.6,0.0,0.03])
 # print(Fore.RED+'after force sensor={}'.format(force_sensor))
-#print(env.action_space.sample())
+# print(env.action_space.sample())
 
 # sum_reward=0
 # for i in range(10):
