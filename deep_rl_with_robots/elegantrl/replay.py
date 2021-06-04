@@ -273,7 +273,7 @@ class ReplayBuffer:
             self.buf_state = torch.empty((max_len, state_dim), dtype=torch.float32, device=self.device)
         else:
             self.buf_other = np.empty((max_len, other_dim), dtype=np.float32)
-            self.buf_state = np.empty((max_len, state_dim), dtype=np.float32)
+            self.buf_state = np.empty((max_len, state_dim[0]), dtype=np.float32)
 
     def append_buffer(self, state, other):  # CPU array to CPU array
         if self.if_gpu:

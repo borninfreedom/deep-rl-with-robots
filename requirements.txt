@@ -1,0 +1,13 @@
+certifi==2021.5.30
+cloudpickle==1.6.0
+colorama==0.4.4
+gym==0.18.3
+numpy==1.20.3
+opencv-contrib-python==4.5.2.52
+opencv-python==4.5.2.52
+Pillow==8.2.0
+pybullet==3.1.0
+pyglet==1.5.15
+scipy==1.6.3
+torch==1.8.1
+typing-extensions==3.10.0.0
